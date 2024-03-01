@@ -3,49 +3,39 @@ const path = require('path')
 
 module.exports = (ctx) => {
   const register = () => {
-    ctx.helper.uploader.register('bilibili', {
+    ctx.helper.uploader.register('torna', {
       handle,
-      name: 'Bilibili 图床',
+      name: 'torna 图床',
       config: config
     })
   }
-  const postOptions = (SESSDATA, csrf, fileName, image) => {
+  const postOptions = (token, myurl ,fileName, image) => {
     return {
       method: 'POST',
-      url: `https://api.bilibili.com/x/dynamic/feed/draw/upload_bfs`,
+      url: `${myurl}/uploadFile`,
       headers: {
         contentType: 'multipart/form-data',
-        'Cookie': `SESSDATA=${SESSDATA}`
+        'Authorization': `Bearer ${token}`
       },
       formData: {
-        file_up: image,
-        csrf,
-        biz: 'article'
+        file: image
       }
     }
   }
   const handle = async (ctx) => {
-    let userConfig = ctx.getConfig('picBed.bilibili')
-    if (!userConfig.SESSDATA) {
-      ctx.emit('notification', {
-        title: '请先配置SESSDATA',
-        body: '链接已复制，请打开浏览器粘贴地址查看相关教程',
-        text: 'https://www.yuque.com/docs/share/9035662a-f2bd-4ba2-aa24-73acb98635c7'
-      })
+    let userConfig = ctx.getConfig('picBed.torna')
+    if (!userConfig.token) {
+     
       return
-      // throw new Error('请先配置SESSDATA')
+      // throw new Error('请先配置token')
     }
-    if (!userConfig.csrf) {
-      ctx.emit('notification', {
-        title: '请先配置csrf',
-        body: '链接已复制，请打开浏览器粘贴地址查看相关教程',
-        text: 'https://www.yuque.com/docs/share/9035662a-f2bd-4ba2-aa24-73acb98635c7'
-      })
+   if (!userConfig.myurl) {
+     
       return
-      // throw new Error('请先配置SESSDATA')
+      // throw new Error('请先配置token')
     }
-    const SESSDATA = userConfig.SESSDATA
-    const csrf = userConfig.csrf
+    const token = userConfig.token
+    const myurl = userConfig.myurl
     const imgList = ctx.output
     for (let i in imgList) {
       let image = imgList[i].buffer
@@ -56,14 +46,15 @@ module.exports = (ctx) => {
       const fileName = imgList[i].fileName
       const filePath = path.join(__dirname, fileName)
       await fs.writeFileSync(filePath, data)
-      const postConfig = postOptions(SESSDATA, csrf, fileName, fs.createReadStream(filePath))
+      const postConfig = postOptions(token, myurl, fileName, fs.createReadStream(filePath))
       let body = await ctx.Request.request(postConfig)
       fs.unlink(filePath, () => {})
       body = JSON.parse(body)
-      if (body.data && body.data.image_url) {
+      if (body.data && body.data.url) {
         delete imgList[i].base64Image
         delete imgList[i].buffer
-        imgList[i].imgUrl = body.data.image_url.replace('http', 'https')
+        //imgList[i].imgUrl = body.data.image_url.replace('http', 'https')
+		imgList[i].imgUrl = myurl+""+body.data.url
       } else {
         ctx.emit('notification', {
           title: '上传失败',
@@ -76,37 +67,33 @@ module.exports = (ctx) => {
   }
 
   const config = ctx => {
-    let userConfig = ctx.getConfig('picBed.bilibili')
+    let userConfig = ctx.getConfig('picBed.torna')
     if (!userConfig) {
       userConfig = {}
     }
     return [
+     
       {
-        name: '获取SESSDATA和csrf',
+        name: 'token',
         type: 'input',
-        default: 'https://www.yuque.com/docs/share/9035662a-f2bd-4ba2-aa24-73acb98635c7',
-        alias: '获取SESSDATA和csrf'
-      },
-      {
-        name: 'SESSDATA',
-        type: 'input',
-        default: userConfig.SESSDATA,
+        default: userConfig.token,
         required: true,
-        message: 'SESSDATA',
-        alias: 'SESSDATA'
+        message: 'token',
+        alias: 'token'
       },
+	  
       {
-        name: 'csrf',
+        name: 'myurl',
         type: 'input',
-        default: userConfig.csrf,
+        default: userConfig.myurl,
         required: true,
-        message: 'csrf',
-        alias: 'csrf'
+        message: 'url前缀',
+        alias: 'myurl'
       }
     ]
   }
   return {
-    uploader: 'bilibili',
+    uploader: 'torna',
     config: config,
     register
   }

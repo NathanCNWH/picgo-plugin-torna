@@ -1,12 +1,12 @@
 {
-  "name": "picgo-plugin-bilibili",
-  "version": "1.1.12",
-  "description": "bilibili 图床",
+  "name": "picgo-plugin-torna",
+  "version": "1.0.0",
+  "description": "torna 图床",
   "main": "src/index.js",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://github.com/xlzy520/picgo-plugin-bilibili",
+  "homepage": "https://github.com/NathanCNWH/picgo-plugin-torna",
   "scripts": {
     "publish": "npm publish --registry https://registry.npmjs.org",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -18,13 +18,13 @@
     "picgo",
     "picgo-gui-plugin",
     "picgo-plugin",
-    "picgo-plugin-bilibili",
-    "bilibili"
+    "picgo-plugin-torna",
+    "torna"
   ],
-  "author": "zhibikanmohuakai",
+  "author": "NathanCNWH",
   "repository": {
     "type": "git",
-    "url": "git@github.com:/xlzy520/picgo-plugin-bilibili.git"
+    "url": "git@github.com:/NathanCNWH/picgo-plugin-torna.git"
   },
   "license": "MIT",
   "devDependencies": {}
